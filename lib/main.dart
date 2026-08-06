@@ -296,7 +296,9 @@ Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: c
 ),
 );
 }
-@overridevoid dispose() {
-_channel.sink.close();super.dispose();
+@override
+void dispose() {
+_channel.sink.close();
+super.dispose();
 }
 }
