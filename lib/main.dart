@@ -282,7 +282,7 @@ color: const Color(0xFF1F1F1F),
 borderRadius: BorderRadius.circular(12),
 ),
 child: Column(
-cross bales: CrossAxisAlignment.start,
+crossAxisAlignment: CrossAxisAlignment.start,
 children: [
 Row(
 children: [
