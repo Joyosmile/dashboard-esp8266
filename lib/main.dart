@@ -143,10 +143,21 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: LineChart(
                   LineChartData(
                     clipData: const FlClipData.all(),
+                    
+                    // PERBAIKAN 1: Mengunci batas sumbu X secara dinamis agar grafik bergeser mulus (smooth scrolling)
+                    minX: selectedGraph == 'RPM' 
+                        ? (rpmSpots.isNotEmpty ? rpmSpots.first.x : 0) 
+                        : (tpsSpots.isNotEmpty ? tpsSpots.first.x : 0),
+                    maxX: selectedGraph == 'RPM' 
+                        ? (rpmSpots.isNotEmpty ? rpmSpots.last.x : 30) 
+                        : (tpsSpots.isNotEmpty ? tpsSpots.last.x : 30),
+                        
+                    minY: 0,
+                    maxY: selectedGraph == 'RPM' ? 12000 : 100, 
+
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: false,
-                      // Jarak garis horizontal (Kelipatan 3000 untuk RPM, Kelipatan 25 untuk TPS)
                       horizontalInterval: selectedGraph == 'RPM' ? 3000 : 25,
                       getDrawingHorizontalLine: (value) {
                         return const FlLine(color: Color(0xFF333333), strokeWidth: 1);
@@ -159,15 +170,20 @@ class _DashboardPageState extends State<DashboardPage> {
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
+                          // PERBAIKAN 2: Memastikan ukuran space kiri tetap konstan agar tidak mendorong kotak grafik
                           reservedSize: 45,
-                          // Menentukan interval teks angka pada sumbu Y agar rapi
                           interval: selectedGraph == 'RPM' ? 3000 : 25,
                           getTitlesWidget: (value, meta) {
                             return SideTitleWidget(
                               axisSide: meta.axisSide,
+                              space: 8, // Beri jarak aman dari teks ke garis grafik
                               child: Text(
                                 value.toInt().toString(),
-                                style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.grey, 
+                                  fontSize: 10, 
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             );
                           },
@@ -175,13 +191,10 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ),
                     borderData: FlBorderData(show: false),
-                    minY: 0,
-                    // PERBAIKAN SKALA: Batas atas RPM diubah ke 12000
-                    maxY: selectedGraph == 'RPM' ? 12000 : 100, 
                     lineBarsData: [
                       LineChartBarData(
                         spots: selectedGraph == 'RPM' ? rpmSpots : tpsSpots,
-                        isCurved: true,
+                        isCurved: true, // Membuat garis tetap melengkung dinamis
                         color: selectedGraph == 'RPM' ? Colors.red : Colors.green,
                         barWidth: 3,
                         isStrokeCapRound: true,
