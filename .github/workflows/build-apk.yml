@@ -25,7 +25,6 @@ jobs:
         with:
           channel: 'stable'
 
-      # LANGKAH BARU: Membuat folder android/ dan struktur file lengkap secara otomatis
       - name: Recreate Flutter Project Structure
         run: |
           mkdir temp_project
@@ -39,9 +38,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # PERBAIKAN 1: Menghapus --split-per-abi agar menghasilkan satu file app-release.apk universal
       - name: Build APK
-        run: flutter build apk --split-per-abi --no-shrink
+        run: flutter build apk --no-shrink
 
+      # PERBAIKAN 2: Menyesuaikan pencarian file APK tunggal hasil kompilasi
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
