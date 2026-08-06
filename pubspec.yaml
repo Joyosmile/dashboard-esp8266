@@ -1,12 +1,25 @@
+name: supra_ecu_dashboard
+description: Aplikasi Dashboard ECU Supra X 125 Offline via ESP8266.
+version: 1.0.0+1
+
+# BAGIAN INI YANG WAJIB ADA AGAR TIDAK ERROR (Sesuai pesan error GitHub Anda)
+environment:
+  sdk: '^3.12.0'
+  flutter: '>=3.3.0'
+
 dependencies:
   flutter:
     sdk: flutter
   
-  # Manajemen state & koneksi real-time
+  # Library pendukung sesuai kebutuhan dashboard kita sebelumnya
   web_socket_channel: ^3.0.1  
-  
-  # Untuk membuat speedometer/gauge (RPM, TPS, Aki)
   syncfusion_flutter_gauges: ^24.2.7 
-  
-  # Untuk grafik histori RPM dan TPS di bagian bawah
   fl_chart: ^0.66.0                  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
