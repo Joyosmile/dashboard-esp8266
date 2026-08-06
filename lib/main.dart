@@ -144,7 +144,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   LineChartData(
                     clipData: const FlClipData.all(),
                     
-                    // Mengunci batas sumbu X secara rigid mengikuti indeks array data
                     minX: selectedGraph == 'RPM' 
                         ? (rpmSpots.isNotEmpty ? rpmSpots.first.x : 0) 
                         : (tpsSpots.isNotEmpty ? tpsSpots.first.x : 0),
@@ -205,8 +204,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
-                  // PERBAIKAN UTAMA: Mematikan animasi bawaan agar tidak memantul/goyang saat data mengalir cepat 🚀
-                  swapAnimationDuration: Duration.zero, 
+                  // PERBAIKAN MUTAKKIL: Nama parameter yang benar untuk fl_chart adalah duration
+                  duration: Duration.zero, 
                 ),
               ),
             ],  
