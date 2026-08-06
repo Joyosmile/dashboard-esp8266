@@ -285,7 +285,8 @@ child: Column(
 cross bales: CrossAxisAlignment.start,
 children: [
 Row(
-children: [Icon(icon, color: color, size: 16),
+children: [
+Icon(icon, color: color, size: 16),
 const SizedBox(width: 6),
 Text(title, style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w600)),
 ],
