@@ -1,0 +1,44 @@
+name: Build Flutter APK
+
+on:
+  push:
+    branches:
+      - main  # Memicu build setiap kali Anda mengupdate/push ke branch main
+  workflow_dispatch: # Membuat tombol manual "Run workflow" di halaman GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Mengambil kode dari repositori Anda
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Menginstal Java (Dibutuhkan untuk build Android)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Menginstal Flutter SDK versi terbaru
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 4. Mengunduh semua library (Syncfusion, FL Chart, dll)
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Proses Coding Build APK (Menghasilkan APK APK release tanpa tanda tangan digital khusus)
+      - name: Build APK
+        run: flutter build apk --split-per-abi --no-shrink
+
+      # 6. Mengupload hasil APK agar bisa diunduh langsung dari GitHub
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dashboard-ECU-SupraX
+          path: build/app/outputs/flutter-apk/app-release.apk
