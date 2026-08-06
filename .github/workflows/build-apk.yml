@@ -35,14 +35,24 @@ jobs:
           cp -r temp_project/* .
           rm -rf temp_project
 
+      # LANGKAH INJEKSI OTOMATIS: Memaksa Android mengizinkan koneksi WebSocket non-secure (ws://)
+      - name: Inject Cleartext Traffic Permission
+        run: |
+          MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST_PATH" ]; then
+            sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' "$MANIFEST_PATH"
+            echo "Sukses menyuntikkan izin keamanan jaringan WebSocket!"
+          else
+            echo "Error: AndroidManifest.xml tidak ditemukan!"
+            exit 1
+          fi
+
       - name: Install dependencies
         run: flutter pub get
 
-      # PERBAIKAN 1: Menghapus --split-per-abi agar menghasilkan satu file app-release.apk universal
       - name: Build APK
         run: flutter build apk --no-shrink
 
-      # PERBAIKAN 2: Menyesuaikan pencarian file APK tunggal hasil kompilasi
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
