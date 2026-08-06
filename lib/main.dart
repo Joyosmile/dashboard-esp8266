@@ -32,21 +32,18 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  // IP Access Point bawaan ESP8266 port standar websocket 81
   final _channel = WebSocketChannel.connect(Uri.parse('ws://192.168.4.1:81'));
 
-  // Variabel Data ECU Supra X 125
   int rpm = 0;
   double tps = 0.0;
   double ect = 0.0;
   double injector = 0.0;
   double battery = 0.0;
 
-  // Variabel untuk Grafik Histori (Maksimal menyimpan 30 data terakhir)
   List<FlSpot> rpmSpots = [];
   List<FlSpot> tpsSpots = [];
   int timeCounter = 0;
-  String selectedGraph = 'RPM'; // Opsi pilihan grafik: 'RPM' atau 'TPS'
+  String selectedGraph = 'RPM';
 
   @override
   void initState() {
@@ -93,11 +90,9 @@ class _DashboardPageState extends State<DashboardPage> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              // GRID 1: Indikator Utama RPM (Besar & Center)
               _buildRpmGauge(),
               const SizedBox(height: 12),
 
-              // GRID 2: Parameter Digital Lainnya (TPS, ECT, INJ, BAT)
               Row(
                 children: [
                   Expanded(child: _buildDataCard("BUKAAN GAS (TPS)", "$tps %", Colors.green, Icons.speed)),
@@ -115,12 +110,10 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               const SizedBox(height: 20),
 
-              // JUDUL & TOMBOL SELEKSI BERSAMPINGAN (RPM & TPS)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text("GRAFIK HISTORI DATA", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
-                  // Desain Tombol Berdampingan Modern
                   Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF2D2D2D),
@@ -139,7 +132,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               const SizedBox(height: 12),
 
-              // BOX GRAFIK HISTORI DENGAN SKALA YANG DIPERBAIKI
+              // BOX GRAFIK HISTORI (MAKSIMAL RPM 12000)
               Container(
                 height: 200,
                 padding: const EdgeInsets.only(top: 16, bottom: 12, right: 16, left: 4),
@@ -149,25 +142,27 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
                 child: LineChart(
                   LineChartData(
-                    // Mengaktifkan garis kisi (grid) latar belakang agar skala mudah dibaca
+                    clipData: const FlClipData.all(),
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: false,
+                      // Jarak garis horizontal (Kelipatan 3000 untuk RPM, Kelipatan 25 untuk TPS)
+                      horizontalInterval: selectedGraph == 'RPM' ? 3000 : 25,
                       getDrawingHorizontalLine: (value) {
                         return const FlLine(color: Color(0xFF333333), strokeWidth: 1);
                       },
                     ),
-                    // Pengaturan teks skala angka di sisi kiri dan bawah
                     titlesData: FlTitlesData(
                       topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)), // Sumbu X dilewati karena berupa realtime-waktu
+                      bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           reservedSize: 45,
+                          // Menentukan interval teks angka pada sumbu Y agar rapi
+                          interval: selectedGraph == 'RPM' ? 3000 : 25,
                           getTitlesWidget: (value, meta) {
-                            // Menampilkan skala angka yang pas agar tidak bertumpuk
                             return SideTitleWidget(
                               axisSide: meta.axisSide,
                               child: Text(
@@ -180,9 +175,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ),
                     borderData: FlBorderData(show: false),
-                    // Menentukan batas atas dan bawah skala Y secara dinamis
                     minY: 0,
-                    maxY: selectedGraph == 'RPM' ? 10000 : 100, // RPM max 10k, TPS max 100%
+                    // PERBAIKAN SKALA: Batas atas RPM diubah ke 12000
+                    maxY: selectedGraph == 'RPM' ? 12000 : 100, 
                     lineBarsData: [
                       LineChartBarData(
                         spots: selectedGraph == 'RPM' ? rpmSpots : tpsSpots,
@@ -207,7 +202,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Fungsi pembuat tombol seleksi grafis berdampingan
   Widget _buildGraphButton(String label, Color activeColor) {
     bool isSelected = selectedGraph == label;
     return GestureDetector(
@@ -235,7 +229,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Widget Pembuat Gauge RPM Bundar
   Widget _buildRpmGauge() {
     return Container(
       height: 220,
@@ -247,7 +240,7 @@ class _DashboardPageState extends State<DashboardPage> {
         axes: <RadialAxis>[
           RadialAxis(
             minimum: 0,
-            maximum: 12000,
+            maximum: 12000, // Batas maksimal bundaran jarum RPM tetap 12000
             pointers: <GaugePointer>[
               NeedlePointer(value: rpm.toDouble(), needleColor: Colors.red, knobStyle: const KnobStyle(color: Colors.white)),
             ],
@@ -261,22 +254,22 @@ class _DashboardPageState extends State<DashboardPage> {
                 widget: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-Text('$rpm', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-const Text('RPM', style: TextStyle(fontSize: 12, color: Colors.grey)),
-],
-),
-angle: 90, positionFactor: 0.5,
-)
-],
-)
-],
-),
-);
-}
-// Widget Pembuat Kartu Informasi Digital
-Widget _buildDataCard(String title, String value, Color color, IconData icon) {
-return Container(
-padding: const EdgeInsets.all(12),
+                    Text('$rpm', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const Text('RPM', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  ],
+                ),
+                angle: 90, positionFactor: 0.5,
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataCard(String title, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
 decoration: BoxDecoration(
 color: const Color(0xFF1F1F1F),
 borderRadius: BorderRadius.circular(12),
