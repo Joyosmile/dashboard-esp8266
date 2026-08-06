@@ -1,0 +1,12 @@
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Manajemen state & koneksi real-time
+  web_socket_channel: ^3.0.1  
+  
+  # Untuk membuat speedometer/gauge (RPM, TPS, Aki)
+  syncfusion_flutter_gauges: ^24.2.7 
+  
+  # Untuk grafik histori RPM dan TPS di bagian bawah
+  fl_chart: ^0.66.0                  
