@@ -132,7 +132,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               const SizedBox(height: 12),
 
-              // BOX GRAFIK HISTORI (MAKSIMAL RPM 12000)
+              // BOX GRAFIK HISTORI
               Container(
                 height: 200,
                 padding: const EdgeInsets.only(top: 16, bottom: 12, right: 16, left: 4),
@@ -144,7 +144,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   LineChartData(
                     clipData: const FlClipData.all(),
                     
-                    // PERBAIKAN 1: Mengunci batas sumbu X secara dinamis agar grafik bergeser mulus (smooth scrolling)
+                    // Mengunci batas sumbu X secara rigid mengikuti indeks array data
                     minX: selectedGraph == 'RPM' 
                         ? (rpmSpots.isNotEmpty ? rpmSpots.first.x : 0) 
                         : (tpsSpots.isNotEmpty ? tpsSpots.first.x : 0),
@@ -170,13 +170,12 @@ class _DashboardPageState extends State<DashboardPage> {
                       leftTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
-                          // PERBAIKAN 2: Memastikan ukuran space kiri tetap konstan agar tidak mendorong kotak grafik
                           reservedSize: 45,
                           interval: selectedGraph == 'RPM' ? 3000 : 25,
                           getTitlesWidget: (value, meta) {
                             return SideTitleWidget(
                               axisSide: meta.axisSide,
-                              space: 8, // Beri jarak aman dari teks ke garis grafik
+                              space: 8,
                               child: Text(
                                 value.toInt().toString(),
                                 style: const TextStyle(
@@ -194,7 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     lineBarsData: [
                       LineChartBarData(
                         spots: selectedGraph == 'RPM' ? rpmSpots : tpsSpots,
-                        isCurved: true, // Membuat garis tetap melengkung dinamis
+                        isCurved: true,
                         color: selectedGraph == 'RPM' ? Colors.red : Colors.green,
                         barWidth: 3,
                         isStrokeCapRound: true,
@@ -206,9 +205,11 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
+                  // PERBAIKAN UTAMA: Mematikan animasi bawaan agar tidak memantul/goyang saat data mengalir cepat 🚀
+                  swapAnimationDuration: Duration.zero, 
                 ),
               ),
-            ],
+            ],  
           ),
         ),
       ),
