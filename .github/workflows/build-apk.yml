@@ -35,15 +35,20 @@ jobs:
           cp -r temp_project/* .
           rm -rf temp_project
 
-      # LANGKAH INJEKSI OTOMATIS: Memaksa Android mengizinkan koneksi WebSocket non-secure (ws://)
-      - name: Inject Cleartext Traffic Permission
+      # SUNTIKAN PERIZINAN SYSTEM ANDROID (Wajib untuk Koneksi Scanner)
+      - name: Inject Internet & Cleartext Permissions
         run: |
           MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
           if [ -f "$MANIFEST_PATH" ]; then
+            # 1. Suntik izin lalu lintas WebSocket lokal non-secure (ws://)
             sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' "$MANIFEST_PATH"
-            echo "Sukses menyuntikkan izin keamanan jaringan WebSocket!"
+            
+            # 2. Suntik izin dasar Akses Internet & Jaringan ke OS Android
+            sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"\/>' "$MANIFEST_PATH"
+            
+            echo "Sukses menyuntikkan seluruh izin keamanan jaringan Android!"
           else
-            echo "Error: AndroidManifest.xml tidak ditemukan!"
+            echo "Error: AndroidManifest.xml gagal dimodifikasi!"
             exit 1
           fi
 
