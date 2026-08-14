@@ -65,149 +65,125 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('HONDA SUPRA X 125 - ECU MONITOR', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 14)),
-        centerTitle: true,
-        actions: [Icon(Icons.wifi, color: rpmSpots.isEmpty ? Colors.red : Colors.green), const SizedBox(width: 15)],
+  // REVISI UTAMA: Mengaktifkan skala, label, dan teks di tengah gauge RPM
+  Widget _buildRpmGauge() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F1F1F),
+        borderRadius: BorderRadius.circular(12),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
+      child: Column(
+        children: [
+          const Text(
+            "ENGINE REVOLUTION (RPM)",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 220,
+            child: SfRadialGauge(
+              axes: <RadialAxis>[
+                RadialAxis(
+                  minimum: 0,
+                  maximum: 12000,
+                  interval: 2000, // Menampilkan angka skala tiap kelipatan 2000
+                  showLabels: true, // Menampilkan angka skala
+                  showTicks: true,  // Menampilkan garis-garis kecil skala
+                  axisLabelStyle: const GaugeTextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  majorTickStyle: const MajorTickStyle(length: 10, thickness: 2, color: Colors.white),
+                  minorTickStyle: const MinorTickStyle(length: 5, thickness: 1, color: Colors.grey),
+                  axisLineStyle: const AxisLineStyle(
+                    thickness: 12,
+                    color: Color(0xFF2D2D2D),
+                  ),
+                  pointers: <GaugePointer>[
+                    NeedlePointer(
+                      value: rpm.toDouble(),
+                      needleColor: Colors.red,
+                      knobStyle: const KnobStyle(color: Colors.red, width: 0.08),
+                    )
+                  ],
+                  annotations: <GaugeAnnotation>[
+                    // Label Teks Digital di Tengah Gauge
+                    GaugeAnnotation(
+                      angle: 90,
+                      positionFactor: 0.5,
+                      widget: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$rpm',
+                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                          const Text(
+                            'RPM',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataCard(String title, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: const Color(0xFF1F1F1F), borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              _buildRpmGauge(),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: _buildDataCard("BUKAAN GAS (TPS)", "$tps %", Colors.green, Icons.speed)),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildDataCard("SUHU OLI (EOT/ECT)", "$ect °C", Colors.orange, Icons.thermostat)),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: _buildDataCard("DURASI INJEKTOR", "$injector ms", Colors.cyan, Icons.shutter_speed)),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildDataCard("ACCU / BATERAI", "$battery V", Colors.yellow, Icons.battery_charging_full)),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: _buildDataCard("VOLTASE SENSOR O2", "$o2Voltage V", Colors.purpleAccent, Icons.waves)),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildDataCard("AFR FEEDBACK", "$afrAktual", _getAfrColor(afrAktual), Icons.analytics)),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("GRAFIK HISTORI DATA", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey)),
-                  Container(
-                    decoration: BoxDecoration(color: const Color(0xFF2D2D2D), borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.all(4),
-                    child: Row(
-                      children: [
-                        _buildGraphButton('RPM', Colors.red),
-                        const SizedBox(width: 4),
-                        _buildGraphButton('TPS', Colors.green),
-                        const SizedBox(width: 4),
-                        _buildGraphButton('AFR', Colors.blueAccent),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Container(
-                height: 200,
-                padding: const EdgeInsets.only(top: 16, bottom: 12, right: 16, left: 4),
-                decoration: BoxDecoration(color: const Color(0xFF1F1F1F), borderRadius: BorderRadius.circular(12)),
-                child: LineChart(
-                  LineChartData(
-                    clipData: const FlClipData.all(),
-                    minX: _getMinX(),
-                    maxX: _getMaxX(),
-                    minY: selectedGraph == 'AFR' ? 10 : 0,
-                    maxY: selectedGraph == 'RPM' ? 12000 : (selectedGraph == 'TPS' ? 100 : 20),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: _getGridInterval(),
-                      getDrawingHorizontalLine: (value) => const FlLine(color: Color(0xFF333333), strokeWidth: 1),
-                    ),
-                    titlesData: FlTitlesData(
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 45,
-                          interval: _getGridInterval(),
-                          getTitlesWidget: (value, meta) {
-                            return SideTitleWidget(
-                              axisSide: meta.axisSide,
-                              space: 8,
-                              child: Text(
-                                selectedGraph == 'AFR' ? value.toStringAsFixed(1) : value.toInt().toString(),
-                                style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: _getSelectedSpots(),
-                        isCurved: true,
-                        color: _getSelectedGraphColor(),
-                        barWidth: 3,
-                        isStrokeCapRound: true,
-                        dotData: const FlDotData(show: false),
-                        belowBarData: BarAreaData(show: true, color: _getSelectedGraphColor().withOpacity(0.12)),
-                      ),
-                    ],
-                  ),
-                  duration: Duration.zero,
-                ),
-              ),
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: 6),
+              Expanded(child: Text(title, style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold))),
             ],
           ),
+          const SizedBox(height: 8),
+          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGraphButton(String label, Color color) {
+    bool isSelected = selectedGraph == label;
+    return GestureDetector(
+      onTap: () => setState(() => selectedGraph = label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? Colors.black : Colors.grey),
         ),
       ),
     );
   }
 
-  Color _getAfrColor(double value) {
-    if (value < 13.5) return Colors.blue;
-    if (value >= 13.5 && value <= 14.8) return Colors.green;
-    return Colors.redAccent;
-  }
-
-  double _getMinX() {
-    if (selectedGraph == 'RPM') return rpmSpots.isNotEmpty ? rpmSpots.first.x : 0;
-    if (selectedGraph == 'TPS') return tpsSpots.isNotEmpty ? tpsSpots.first.x : 0;
-    return afrSpots.isNotEmpty ? afrSpots.first.x : 0;
-  }
-
-  double _getMaxX() {
-    if (selectedGraph == 'RPM') return rpmSpots.isNotEmpty ? rpmSpots.last.x : 30;
-    if (selectedGraph == 'TPS') return tpsSpots.isNotEmpty ? tpsSpots.last.x : 30;
-    return afrSpots.isNotEmpty ? afrSpots.last.x : 30;
-  }
+  // Fungsi helper pendukung untuk FL Chart yang sempat terpotong
+  double _getMinX() => rpmSpots.isEmpty ? 0 : rpmSpots.first.x;
+  double _getMaxX() => rpmSpots.isEmpty ? 30 : rpmSpots.last.x;
 
   double _getGridInterval() {
     if (selectedGraph == 'RPM') return 3000;
     if (selectedGraph == 'TPS') return 25;
-    return 2.0;
+    return 2;
   }
 
   List<FlSpot> _getSelectedSpots() {
@@ -222,76 +198,15 @@ class _DashboardPageState extends State<DashboardPage> {
     return Colors.blueAccent;
   }
 
-  Widget _buildGraphButton(String label, Color color) {
-    bool isSelected = selectedGraph == label;
-    return GestureDetector(
-      onTap: () => setState(() => selectedGraph = label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(color: isSelected ? color : Colors.transparent, borderRadius: BorderRadius.circular(6)),
-        child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? Colors.black : Colors.grey)),
-      ),
-    );
+  Color _getAfrColor(double value) {
+    if (value < 13.5) return Colors.blue;
+    if (value >= 13.5 && value <= 14.8) return Colors.green;
+    return Colors.redAccent;
   }
 
-    Widget _buildDataCard(String title, String value, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: const Color(0xFF1F1F1F), borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 16),
-              const SizedBox(width: 6),
-              Text(title, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRpmGauge() {
-    return Container(
-      height: 180,
-      decoration: BoxDecoration(color: const Color(0xFF1F1F1F), borderRadius: BorderRadius.circular(12)),
-      child: SfRadialGauge(
-        axes: <RadialAxis>[
-          RadialAxis(
-            minimum: 0,
-            maximum: 12000,
-            showLabels: false,
-            showTicks: false,
-            startAngle: 180,
-            endAngle: 0,
-            radiusFactor: 0.8,
-            canScaleToFit: true,
-            axisLineStyle: const AxisLineStyle(thickness: 0.1, color: Color(0xFF2D2D2D), thicknessUnit: GaugeSizeUnit.factor),
-            pointers: <GaugePointer>[
-              RangePointer(value: rpm.toDouble(), width: 0.1, sizeUnit: GaugeSizeUnit.factor, color: Colors.red, enableAnimation: true, animationDuration: 100),
-              NeedlePointer(value: rpm.toDouble(), needleLength: 0.7, needleColor: Colors.white, needleStartWidth: 1, needleEndWidth: 4, knobStyle: const KnobStyle(knobRadius: 0.08, color: Colors.white), enableAnimation: true, animationDuration: 100)
-            ],
-            annotations: <GaugeAnnotation>[
-              GaugeAnnotation(
-                widget: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(rpm.toString(), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-                    const Text('RPM', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
-                  ],
-                ),
-                angle: 90,
-                positionFactor: 0.6,
-              )
-            ],
-          )
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _channel.sink.close();
+    super.dispose();
   }
 }
-
