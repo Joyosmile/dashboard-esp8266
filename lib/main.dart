@@ -414,7 +414,8 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              margin: const EdgeInsets.bottom(12),
+              // PERBAIKAN: Mengubah EdgeInsets.bottom menjadi EdgeInsets.only
+              margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: _isPaused ? Colors.orange.withOpacity(0.15) : Colors.cyan.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
@@ -496,7 +497,7 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
       ),
     );
   }
-}
+
 
 class EcuSnapshot {
   final double time;
