@@ -497,7 +497,7 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
       ),
     );
   }
-
+}
 
 class EcuSnapshot {
   final double time;
