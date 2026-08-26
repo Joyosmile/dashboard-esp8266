@@ -416,9 +416,9 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
       if (!mounted) return;
       try {
         final Map<String, dynamic> data = jsonDecode(message.toString());
-        if (data.containsKey('raw')) {
+        if (data.containsKey('raw_hex')) {
           setState(() {
-            rawBytes = data['raw'];
+            rawBytes = data['raw_hex'];
           });
         }
       } catch (e) {
