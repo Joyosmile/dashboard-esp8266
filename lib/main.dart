@@ -7,7 +7,11 @@ import 'dart:convert';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  // Set aplikasi sepenuhnya hanya dalam mode Portrait
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const SupraEcuApp());
 }
 
@@ -72,6 +76,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   void initState() {
     super.initState();
+    // Memastikan orientasi tetap portrait saat inisialisasi awal
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    
     _broadcastStream = _channel.stream.asBroadcastStream();
     
     _broadcastStream.listen((message) {
@@ -127,12 +137,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   }
 
   void _onItemTapped(int index) {
-    if (_selectedIndex == 1 && index != 1) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-    }
+    // Dipaksa mengunci portrait ke atas dan bawah di semua tab navigasi
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     setState(() {
       _selectedIndex = index;
     });
@@ -223,6 +232,7 @@ class DashboardPage extends StatelessWidget {
               thicknessUnit: GaugeSizeUnit.factor,
             ),
             pointers: <GaugePointer>[
+              // SOLUSI: Menggunakan bar gradien yang diletakkan presisi pada jalurnya agar tidak menutupi jarum
               RangePointer(
                 value: state.rpm.toDouble(),
                 width: 0.06,
@@ -240,7 +250,7 @@ class DashboardPage extends StatelessWidget {
                 needleEndWidth: 5,
                 knobStyle: const KnobStyle(
                   knobRadius: 0.07,
-                  color: Color(0xFF232330),
+                  color: Color(0xFF16161D), // Disamakan dengan background agar bersih
                   borderColor: Colors.redAccent,
                   borderWidth: 1.5,
                 ),
@@ -364,7 +374,7 @@ class DashboardPage extends StatelessWidget {
   }
 }
 
-// ================= HALAMAN 2: GRAFIK LIVE (LANDSCAPE OPTIMIZED) =================
+// ================= HALAMAN 2: GRAFIK LIVE (PORTRAIT LOCKED) =================
 class LiveGraphPage extends StatefulWidget {
   final EcuState state;
   const LiveGraphPage({super.key, required this.state});
@@ -379,9 +389,10 @@ class _LiveGraphPageState extends State<LiveGraphPage> {
   @override
   void initState() {
     super.initState();
+    // Mengunci halaman grafik ke Portrait juga sesuai permintaan baru
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
     ]);
   }
 
@@ -411,7 +422,7 @@ class _LiveGraphPageState extends State<LiveGraphPage> {
         onTap: () => setState(() => selectedGraph = label),
         borderRadius: BorderRadius.circular(8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? color.withOpacity(0.15) : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
@@ -419,7 +430,7 @@ class _LiveGraphPageState extends State<LiveGraphPage> {
           ),
           child: Text(
             label,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isSelected ? color : const Color(0xFF8E8E9F), letterSpacing: 1),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isSelected ? color : const Color(0xFF8E8E9F), letterSpacing: 0.5),
           ),
         ),
       ),
@@ -427,42 +438,41 @@ class _LiveGraphPageState extends State<LiveGraphPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(幕ontext) {
     Color activeColor = Colors.redAccent;
     if (selectedGraph == 'TPS') activeColor = Colors.orangeAccent;
     if (selectedGraph == 'AFR') activeColor = Colors.greenAccent;
 
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            const Icon(Icons.analytics_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text('${selectedGraph} REAL-TIME GRAPH', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              // Tombol pilihan diletakkan horizontal di atas grafik (Cocok untuk portrait)
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.analytics_rounded, color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                      Text('${selectedGraph} REAL-TIME GRAPH', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      _buildGraphButton('RPM', Colors.redAccent),
-                      const SizedBox(width: 8),
-                      _buildGraphButton('TPS', Colors.orangeAccent),
-                      const SizedBox(width: 8),
-                      _buildGraphButton('AFR', Colors.greenAccent),
-                    ],
-                  )
+                  _buildGraphButton('RPM', Colors.redAccent),
+                  const SizedBox(width: 12),
+                  _buildGraphButton('TPS', Colors.orangeAccent),
+                  const SizedBox(width: 12),
+                  _buildGraphButton('AFR', Colors.greenAccent),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.only(right: 24, left: 12, top: 16, bottom: 8),
+                  padding: const EdgeInsets.only(right: 20, left: 8, top: 16, bottom: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFF16161D), 
                     borderRadius: BorderRadius.circular(16),
@@ -503,7 +513,7 @@ class _LiveGraphPageState extends State<LiveGraphPage> {
                               leftTitles: AxisTitles(
                                 sideTitles: SideTitles(
                                   showTitles: true,
-                                  reservedSize: selectedGraph == 'RPM' ? 48 : 36,
+                                  reservedSize: selectedGraph == 'RPM' ? 44 : 32,
                                   interval: _getGridInterval(),
                                   getTitlesWidget: (value, meta) {
                                     if (value == meta.max) return const SizedBox.shrink();
