@@ -255,7 +255,7 @@ class DashboardPage extends StatelessWidget {
                   children: [
                     Text(
                       '${state.rpm}',
-                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.extrabold, color: Colors.white, fontFamily: 'monospace', letterSpacing: -1),
+                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.white, fontFamily: 'monospace', letterSpacing: -1),
                     ),
                     const Text(
                       'RPM',
@@ -299,7 +299,7 @@ class DashboardPage extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.extrabold, fontFamily: 'monospace'),
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800, fontFamily: 'monospace'),
                 ),
               ],
             ),
@@ -316,7 +316,7 @@ class DashboardPage extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('SUPRA FI ECU TELEMETRY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.extrabold, letterSpacing: 0.5)),
+            const Text('SUPRA FI ECU TELEMETRY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
             const SizedBox(height: 2),
             Row(
               children: [
@@ -445,7 +445,7 @@ class _LiveGraphPageState extends State<LiveGraphPage> {
                     children: [
                       const Icon(Icons.analytics_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
-                      Text('${selectedGraph} REAL-TIME GRAPH', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.extrabold, letterSpacing: 0.5)),
+                      Text('${selectedGraph} REAL-TIME GRAPH', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
                     ],
                   ),
                   Row(
@@ -565,18 +565,6 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> items = List.generate(widget.state.rawBytes.length, (index) {
-      final value = widget.state.state.rawBytes[index] rescue widget.state.rawBytes[index];
-      final hexStr = '0x${value.toRadixString(16).toUpperCase().padLeft(2, "0")}';
-      return {
-        'index': index,
-        'indexHex': '0x${index.toRadixString(16).toUpperCase().padLeft(2, "0")}',
-        'dec': value.toString(),
-        'hex': hexStr,
-      };
-    });
-
-    // Fix a minor visual syntax bug from quick generate string mapping
     final List<Map<String, dynamic>> secureItems = List.generate(widget.state.rawBytes.length, (index) {
       final value = widget.state.rawBytes[index];
       final hexStr = '0x${value.toRadixString(16).toUpperCase().padLeft(2, "0")}';
@@ -598,7 +586,7 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DATA STREAM BUFFER (30 HEX)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.extrabold, letterSpacing: 0.5)),
+        title: const Text('DATA STREAM BUFFER (30 HEX)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
       ),
       body: Column(
         children: [
