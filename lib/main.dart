@@ -104,9 +104,9 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   double _getGridInterval() {
-    if (selectedGraph == 'TPS') return 20;   // Lompatan skala per 20%
-    if (selectedGraph == 'AFR') return 2;    // Lompatan skala per 2 poin AFR
-    return 2000;                             // Lompatan skala per 2000 RPM
+    if (selectedGraph == 'TPS') return 20;   
+    if (selectedGraph == 'AFR') return 2;    
+    return 2000;                             
   }
 
   @override
@@ -295,7 +295,7 @@ class _DashboardPageState extends State<DashboardPage> {
               childAspectRatio: 2.5,
               children: [
                 _buildDataCard('BUKAAN TPS', '$tps %', Colors.orange, Icons.speed),
-                _buildDataCard('SUHU MESIN (ECT)', '$ect Â°C', Colors.blue, Icons.thermostat),
+                _buildDataCard('SUHU MESIN (ECT)', '$ect °C', Colors.blue, Icons.thermostat),
                 _buildDataCard('INJEKTOR DURASI', '$injector ms', Colors.purple, Icons.shutter_speed),
                 _buildDataCard('TEGANGAN AKI', '$battery V', Colors.green, Icons.battery_charging_full),
                 _buildDataCard('TEGANGAN O2', '$o2Voltage V', Colors.indigo, Icons.electric_bolt),
@@ -442,8 +442,8 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
       if (!mounted) return;
       try {
         final Map<String, dynamic> data = jsonDecode(message.toString());
-        if (data.containsKey('raw')) {
-          final List<dynamic> parsedRaw = data['raw'];
+        if (data.containsKey('raw_hex')) {
+          final List<dynamic> parsedRaw = data['raw_hex'];
           setState(() {
             rawBytes = parsedRaw.map((e) => int.tryParse(e.toString()) ?? 0).toList();
           });
@@ -458,10 +458,10 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> items = List.generate(rawBytes.length, (index) {
       final value = rawBytes[index];
-      final hexStr = '0x\${value.toRadixString(16).toUpperCase().padLeft(2, '0')}';
+      final hexStr = '0x${value.toRadixString(16).toUpperCase().padLeft(2, "0")}';
       return {
         'index': index,
-        'indexHex': '0x\${index.toRadixString(16).toUpperCase().padLeft(2, '0')}',
+        'indexHex': '0x${index.toRadixString(16).toUpperCase().padLeft(2, "0")}',
         'dec': value.toString(),
         'hex': hexStr,
       };
@@ -525,7 +525,7 @@ class _RawDataTablePageState extends State<RawDataTablePage> {
                                 borderRadius: BorderRadius.circular(4)
                               ),
                               child: Text(
-                                '(${item['indexHex']} (${item['index']})',
+                                '${item['indexHex']} (${item['index']})',
                                 style: const TextStyle(color: Colors.redAccent, fontFamily: 'monospace', fontSize: 12, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
