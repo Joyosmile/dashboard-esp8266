@@ -249,8 +249,9 @@ class DashboardPage extends StatelessWidget {
                 needleStartWidth: 1,
                 needleEndWidth: 5,
                 knobStyle: const KnobStyle(
-                  knobRadius: 0.07,
-                  color: Color(0xFF16161D), // Disamakan dengan background agar bersih
+                  knobRadius: 10, // Menggunakan ukuran piksel tetap agar tidak membesar liar
+                  sizeUnit: GaugeSizeUnit.logicalPixel, // Mengunci satuan ke piksel logis
+                  color: Color(0xFF16161D),
                   borderColor: Colors.redAccent,
                   borderWidth: 1.5,
                 ),
