@@ -47,6 +47,7 @@ class EcuState {
   String ecuIdText = "Membaca ECU ID...";
   List<int> rawBytes = List.filled(30, 0);
   List<EcuSnapshot> history = [];
+  bool isEcuConnected = false;
 }
 
 class EcuSnapshot {
@@ -89,6 +90,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       try {
         final Map<String, dynamic> data = jsonDecode(message.toString());
         setState(() {
+          _state.isEcuConnected = true;
           _state.rpm = data['rpm'] ?? 0;
           _state.tps = _convertToDouble(data['tps']);
           _state.ect = _convertToDouble(data['ect']);
@@ -196,7 +198,7 @@ class DashboardPage extends StatelessWidget {
     return Colors.green;
   }
 
-  Widget _buildRpmGauge() {
+    Widget _buildRpmGauge() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
@@ -207,80 +209,114 @@ class DashboardPage extends StatelessWidget {
           BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
-      child: SfRadialGauge(
-        axes: <RadialAxis>[
-          RadialAxis(
-            minimum: 0,
-            maximum: 12000,
-            showLabels: true,
-            showTicks: true,
-            interval: 2000,
-            labelOffset: 18,
-            axisLabelStyle: const GaugeTextStyle(color: Color(0xFF8E8E9F), fontSize: 11, fontWeight: FontWeight.w600, fontFamily: 'monospace'),
-            majorTickStyle: const MajorTickStyle(length: 10, thickness: 2, color: Color(0xFF444454)),
-            minorTickStyle: const MinorTickStyle(length: 5, thickness: 1, color: Color(0xFF2D2D3A)),
-            minorTicksPerInterval: 4,
-            startAngle: 170,
-            endAngle: 10,
-            radiusFactor: 0.95,
-            centerX: 0.5,
-            centerY: 0.65,
-            canScaleToFit: true,
-            axisLineStyle: const AxisLineStyle(
-              thickness: 0.06,
-              color: Color(0xFF232330),
-              thicknessUnit: GaugeSizeUnit.factor,
+      // MENGGUNAKAN STACK AGAR IKON BISA MENUMPUK DI ATAS GAUGE
+      child: Stack(
+        children: [
+          // 1. INDIKATOR WI-FI (Diposisikan di pojok kanan atas di dalam kotak)
+          Positioned(
+            top: 4,
+            right: 8,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  state.isEcuConnected ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+                  size: 16,
+                  // Berwarna hijau jika terhubung, merah jika terputus
+                  color: state.isEcuConnected ? Colors.greenAccent : Colors.redAccent,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  state.isEcuConnected ? "CONNECTED" : "DISCONNECTED",
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: state.isEcuConnected ? Colors.greenAccent : Colors.redAccent,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
             ),
-            pointers: <GaugePointer>[
-              // SOLUSI: Menggunakan bar gradien yang diletakkan presisi pada jalurnya agar tidak menutupi jarum
-              RangePointer(
-                value: state.rpm.toDouble(),
-                width: 0.06,
-                sizeUnit: GaugeSizeUnit.factor,
-                gradient: const SweepGradient(
-                  colors: <Color>[Colors.greenAccent, Colors.yellowAccent, Colors.redAccent],
-                  stops: <double>[0.0, 0.65, 0.85],
+          ),
+          
+          // 2. RPM GAUGE UTAMA
+          SfRadialGauge(
+            axes: <RadialAxis>[
+              RadialAxis(
+                minimum: 0,
+                maximum: 12000,
+                showLabels: true,
+                showTicks: true,
+                interval: 2000,
+                labelOffset: 18,
+                axisLabelStyle: const GaugeTextStyle(color: Color(0xFF8E8E9F), fontSize: 11, fontWeight: FontWeight.w600, fontFamily: 'monospace'),
+                majorTickStyle: const MajorTickStyle(length: 10, thickness: 2, color: Color(0xFF444454)),
+                minorTickStyle: const MinorTickStyle(length: 5, thickness: 1, color: Color(0xFF2D2D3A)),
+                minorTicksPerInterval: 4,
+                startAngle: 170,
+                endAngle: 10,
+                radiusFactor: 0.95,
+                centerX: 0.5,
+                centerY: 0.65,
+                canScaleToFit: true,
+                axisLineStyle: const AxisLineStyle(
+                  thickness: 0.06,
+                  color: Color(0xFF232330),
+                  thicknessUnit: GaugeSizeUnit.factor,
                 ),
-              ),
-              NeedlePointer(
-                value: state.rpm.toDouble(),
-                needleLength: 0.8,
-                needleColor: Colors.redAccent,
-                needleStartWidth: 1,
-                needleEndWidth: 5,
-                knobStyle: const KnobStyle(
-                  knobRadius: 10, // Menggunakan ukuran piksel tetap agar tidak membesar liar
-                  sizeUnit: GaugeSizeUnit.logicalPixel, // Mengunci satuan ke piksel logis
-                  color: Color(0xFF16161D),
-                  borderColor: Colors.redAccent,
-                  borderWidth: 1.5,
-                ),
+                pointers: <GaugePointer>[
+                  RangePointer(
+                    value: state.rpm.toDouble(),
+                    width: 0.06,
+                    sizeUnit: GaugeSizeUnit.factor,
+                    gradient: const SweepGradient(
+                      colors: <Color>[Colors.greenAccent, Colors.yellowAccent, Colors.redAccent],
+                      stops: <double>[0.0, 0.65, 0.85],
+                    ),
+                  ),
+                  NeedlePointer(
+                    value: state.rpm.toDouble(),
+                    needleLength: 0.8,
+                    needleColor: Colors.redAccent,
+                    needleStartWidth: 1,
+                    needleEndWidth: 5,
+                    // Penerapan perbaikan Knob yang kita bahas sebelumnya
+                    knobStyle: const KnobStyle(
+                      knobRadius: 10,
+                      sizeUnit: GaugeSizeUnit.logicalPixel,
+                      color: Color(0xFF16161D),
+                      borderColor: Colors.redAccent,
+                      borderWidth: 1.5,
+                    ),
+                  )
+                ],
+                annotations: <GaugeAnnotation>[
+                  GaugeAnnotation(
+                    angle: 90,
+                    positionFactor: 0.4,
+                    widget: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${state.rpm}',
+                          style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.white, fontFamily: 'monospace', letterSpacing: -1),
+                        ),
+                        const Text(
+                          'RPM',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.redAccent, letterSpacing: 1.5),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
               )
             ],
-            annotations: <GaugeAnnotation>[
-              GaugeAnnotation(
-                angle: 90,
-                positionFactor: 0.4,
-                widget: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${state.rpm}',
-                      style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: Colors.white, fontFamily: 'monospace', letterSpacing: -1),
-                    ),
-                    const Text(
-                      'RPM',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.redAccent, letterSpacing: 1.5),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          )
+          ),
         ],
       ),
     );
   }
+
 
   Widget _buildDataCard(String title, String value, Color accentColor, IconData icon) {
     return Container(
@@ -327,7 +363,7 @@ class DashboardPage extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('SUPRA FI ECU TELEMETRY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+            const Text('SUPRA 125 DASHBOARD', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
             const SizedBox(height: 2),
             Row(
               children: [
@@ -339,7 +375,7 @@ class DashboardPage extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   'ID: ${state.ecuIdText}',
-                  style: TextStyle(fontSize: 11, color: Colors.grey.shade400, fontWeight: FontWeight.w500, fontFamily: 'monospace'),
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade400, fontWeight: FontWeight.w500, fontFamily: 'monospace'),
                 ),
               ],
             ),
