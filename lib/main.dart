@@ -438,7 +438,7 @@ class _LiveGraphPageState extends State<LiveGraphPage> {
   }
 
   @override
-  Widget build(幕ontext) {
+  Widget build(context) {
     Color activeColor = Colors.redAccent;
     if (selectedGraph == 'TPS') activeColor = Colors.orangeAccent;
     if (selectedGraph == 'AFR') activeColor = Colors.greenAccent;
