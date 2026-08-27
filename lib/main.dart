@@ -176,9 +176,9 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildRpmGauge() {
+   Widget _buildRpmGauge() {
     return Container(
-      height: 200, 
+      height: 140, // DIKECILKAN agar tidak menabrak GridView di bawahnya
       decoration: BoxDecoration(color: const Color(0xFF1F1F1F), borderRadius: BorderRadius.circular(12)),
       child: SfRadialGauge(
         axes: <RadialAxis>[
@@ -195,7 +195,9 @@ class _DashboardPageState extends State<DashboardPage> {
             minorTicksPerInterval: 4,
             startAngle: 180,
             endAngle: 0,
-            radiusFactor: 0.85, 
+            radiusFactor: 0.9, // SEDIKIT DIPERBESAR agar pas dengan container baru
+            centerX: 0.5,
+            centerY: 0.7, // DIGESER KE BAWAH agar proporsional sebagai setengah lingkaran
             canScaleToFit: true,
             axisLineStyle: const AxisLineStyle(
               thickness: 0.08,
@@ -225,11 +227,11 @@ class _DashboardPageState extends State<DashboardPage> {
             annotations: <GaugeAnnotation>[
               GaugeAnnotation(
                 angle: 90,
-                positionFactor: 0.45,
+                positionFactor: 0.2, // DINAIKKAN posisinya agar tulisan pas berada di dalam meteran
                 widget: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('$rpm', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('$rpm', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                     const Text('RPM', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
                   ],
                 ),
@@ -240,6 +242,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
+
 
   Widget _buildDataCard(String title, String value, Color accentColor, IconData icon) {
     return Container(
